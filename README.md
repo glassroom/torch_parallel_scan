@@ -1,6 +1,6 @@
 # torch_parallel_scan
 
-An implementation of parallel scan over sequences of tensors for PyTorch.
+A simple implementation of parallel scan over sequences of tensors for PyTorch.
 
 Only 40 lines of Python code, excluding docstrings and whitespace.
 
@@ -43,7 +43,9 @@ y = tps.reduce_scan(x, torch.matmul, dim=-3)  # matmul of all matrices
 
 ## Notes
 
-For both `prefix_scan` and `reduce_scan`, the binary associative function you pass as an argument must compute outputs that have the same shape as the inputs. If you wish to compute parallel scans over different shapes (e.g., products of matrices of different shapes), use padding. We have no plans to change this, because it would likely make the code in this repository significantly more complex. Our goal is for the code here to remain as short and simple as possible.
+For both `prefix_scan` and `reduce_scan`, the binary associative function you pass as an argument must compute outputs that have the same shape as the inputs. If you wish to compute parallel scans over different shapes (e.g., products of matrices of different shapes), use padding. We have no plans to change this, because it would likely make the code in this repository significantly more complex.
+
+We want the code in this repository to remain as short and simple as possible, so others can more easily understand and modify it for their own purposes.
 
 
 ## Citing
