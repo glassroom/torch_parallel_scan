@@ -51,23 +51,23 @@ and applying a parallel prefix scan over the reformulated sequence. Example:
 
 ```python
 n, d = (100, 1024)
-W = torch.randn(n, d, d) / (d**0.5)
-b = torch.empty(n, d).uniform_(-0.1, 0.1)
-x = torch.randn(d)
+x0 = torch.randn(d)                        # initial vector state
+W = torch.randn(n, d, d) / (d**0.5)        # n left-to-right weights
+b = torch.empty(n, d).uniform_(-0.1, 0.1)  # n biases
 
 # Reformulate as *left-to-right* matrix products:
 mod_W = torch.cat([
     F.pad(W, (0, 1), value=0),
     F.pad(b, (0, 1), value=1).unsqueeze(-2),
 ], dim=-2)
-mod_x = F.pad(x, (0, 1), value=1)
+mod_x0 = F.pad(x0, (0, 1), value=1)
 
 # Compute cumulative matmuls and apply them to mod_x:
 cum_mod_W = tps.prefix_scan(mod_W, torch.matmul, dim=-3)
-mod_y = mod_x @ cum_mod_W
+mod_x = mod_x0 @ cum_mod_W
 
-# Drop last elements:
-y = mod_y[:, :-1]
+# Drop all last elements:
+x = mod_x[:, :-1]
 ```
 
 
