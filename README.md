@@ -47,6 +47,8 @@ You can compute non-diagonal recurrences of the form $x_t = W_t x_{t-1} + b_t$ i
 
 ![Non-Diagonal Recurrences](assets/non_diagonal_recurrences.png)
 
+and applying a parallel prefix scan over the reformulated sequence.
+
 
 ## Notes
 
