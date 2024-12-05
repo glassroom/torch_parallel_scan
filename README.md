@@ -45,40 +45,8 @@ y = tps.reduce_scan(x, torch.matmul, dim=-3)  # matmul of all matrices
 
 You can compute non-diagonal recurrences of the form $x_t = W_t x_{t-1} + b_t$ in parallel by reformulating them as a sequence of matrix products:
 
-$\begin{aligned}
-	\underbrace{
-		\setlength\arraycolsep{0.2em} \begin{bmatrix}
-			\\
-			x_i \\
-			\\
-			\hline
-			1 \\
-		\end{bmatrix}
-	}_{\mathlarger x'_i}
-	& =
-	\underbrace{
-		\setlength\arraycolsep{0.4em} \left[ \begin{array}{ccc|c}
-			&            & &     \\
-			& W_i        & & b_i \\
-			&            & &     \\
-			\hline
-			& 0\text{'s} & & 1   \\
-		\end{array} \right]
-	}_{\mathlarger W'_i}
-	\underbrace{
-		\setlength\arraycolsep{0.2em} \begin{bmatrix}
-			\\
-			x_{i-1} \\
-			\\
-			\hline
-			1 \\
-		\end{bmatrix}
-	}_{\mathlarger x'_{i-1}}
-	\\
-	x'_i
-	& = W'_i W'_{i-1} \dots W'_1 x'_0.
-	\\
-\end{aligned}$
+![Non-Diagonal Recurrences](assets/non_diagonal_recurrences.png)
+
 
 ## Notes
 
