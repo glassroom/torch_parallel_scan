@@ -6,7 +6,8 @@ import math
 
 def prefix_scan(x, prefix_func, dim, pad_value=0):
     """
-    Apply prefix func in parallel over sequence, left to right.
+    Apply prefix_func in parallel over sequence, left to right, executing
+    log2(seq length) iterations. Implemented by Franz A. Heinsen, 2024.
 
     Args:
         x: tensor of shape [*preceding_dims, seq_len, *operand_dims].
@@ -44,7 +45,8 @@ def prefix_scan(x, prefix_func, dim, pad_value=0):
 
 def reduce_scan(x, reduce_func, dim):
     """
-    Apply reduce_func in parallel over sequence, left to right.
+    Apply reduce_func in parallel over sequence, left to right, executing
+    log2(seq length) iterations. Implemented by Franz A. Heinsen, 2024.
 
     Args:
         x: tensor of shape [*preceding_dims, seq_len, *operand_dims].
