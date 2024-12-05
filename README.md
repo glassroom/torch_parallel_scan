@@ -50,6 +50,9 @@ You can compute non-diagonal recurrences of the form $x_t = W_t x_{t-1} + b_t$ i
 and applying a parallel prefix scan over the reformulated sequence. Example:
 
 ```python
+import torch
+import torch_parallel_scan as tps
+
 n, d = (100, 1024)
 x0 = torch.randn(d)                        # initial vector state
 W = torch.randn(n, d, d) / (d**0.5)        # n left-to-right weights
