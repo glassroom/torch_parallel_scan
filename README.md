@@ -47,7 +47,28 @@ You can compute non-diagonal recurrences of the form $x_t = W_t x_{t-1} + b_t$ i
 
 ![Non-Diagonal Recurrences](assets/non_diagonal_recurrences.png)
 
-and applying a parallel prefix scan over the reformulated sequence.
+and applying a parallel prefix scan over the reformulated sequence. Example:
+
+```python
+n, d = (100, 1024)
+W = torch.randn(n, d, d) / (d**0.5)
+b = torch.empty(n, d).uniform_(-0.1, 0.1)
+x = torch.randn(d)
+
+# Reformulate as *left-to-right* matrix products:
+mod_W = torch.cat([
+    F.pad(W, (0, 1), value=0),
+    F.pad(b, (0, 1), value=1).unsqueeze(-2),
+], dim=-2)
+mod_x = F.pad(x, (0, 1), value=1)
+
+# Compute cumulative matmuls and apply them to mod_x:
+cum_mod_W = tps.prefix_scan(mod_W, torch.matmul, dim=-3)
+mod_y = mod_x @ cum_mod_W
+
+# Drop last elements:
+y = mod_y[:, :-1]
+```
 
 
 ## Notes
