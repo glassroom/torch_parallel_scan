@@ -24,10 +24,11 @@ The only dependency is PyTorch.
 ```python
 import torch
 import torch_parallel_scan as tps
+DEVICE = 'cuda'  # change as needed
 
-n, d = (100, 1024)
-x = torch.randn(n, d, d) / (d**0.5)           # n square matrices
-y = tps.prefix_scan(x, torch.matmul, dim=-3)  # cumulative matmul
+n, d = (8192, 64)
+x = torch.randn(n, d, d, device=DEVICE) / (d**0.5)  # n square matrices
+y = tps.prefix_scan(x, torch.matmul, dim=-3)        # cumulative matmul
 ```
 
 ### Sequential Chain of Matrix Products via Parallel Reduce Scan
@@ -35,10 +36,11 @@ y = tps.prefix_scan(x, torch.matmul, dim=-3)  # cumulative matmul
 ```python
 import torch
 import torch_parallel_scan as tps
+DEVICE = 'cuda'  # change as needed
 
-n, d = (100, 1024)
-x = torch.randn(n, d, d) / (d**0.5)           # n square matrices
-y = tps.reduce_scan(x, torch.matmul, dim=-3)  # matmul of all matrices
+n, d = (8192, 64)
+x = torch.randn(n, d, d, device=DEVICE) / (d**0.5)  # n square matrices
+y = tps.reduce_scan(x, torch.matmul, dim=-3)        # matmul of all matrices
 ```
 
 ### Non-Diagonal Recurrences $x_t = W_t x_{t-1} + b_t$ in Parallel
@@ -52,18 +54,19 @@ and applying a parallel prefix scan over the reformulated sequence. Example:
 ```python
 import torch
 import torch_parallel_scan as tps
+DEVICE = 'cuda'  # change as needed
 
-n, d = (100, 1024)
-x0 = torch.randn(d)                        # initial vector state
-W = torch.randn(n, d, d) / (d**0.5)        # n left-to-right weights
-b = torch.empty(n, d).uniform_(-0.1, 0.1)  # n biases
+n, d = (8192, 64)
+x0 = torch.randn(d, device=DEVICE)                        # initial vector state
+W = torch.randn(n, d, d, device=DEVICE) / (d**0.5)        # n left-to-right weights
+b = torch.empty(n, d, device=DEVICE).uniform_(-0.1, 0.1)  # n biases
 
 # Reformulate as *left-to-right* matrix products:
 mod_W = torch.cat([
-    F.pad(W, (0, 1), value=0),
-    F.pad(b, (0, 1), value=1).unsqueeze(-2),
+    torch.nn.functional.pad(W, (0, 1), value=0),
+    torch.nn.functional.pad(b, (0, 1), value=1).unsqueeze(-2),
 ], dim=-2)
-mod_x0 = F.pad(x0, (0, 1), value=1)
+mod_x0 = torch.nn.functional.pad(x0, (0, 1), value=1)
 
 # Compute cumulative matmuls and apply them to mod_x:
 cum_mod_W = tps.prefix_scan(mod_W, torch.matmul, dim=-3)
