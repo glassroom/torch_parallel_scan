@@ -61,7 +61,7 @@ x0 = torch.randn(d, device=DEVICE)                        # initial vector state
 W = torch.randn(n, d, d, device=DEVICE) / (d**0.5)        # n left-to-right weights
 b = torch.empty(n, d, device=DEVICE).uniform_(-0.1, 0.1)  # n biases
 
-# Reformulate as *left-to-right* matrix products:
+# Formulate as sequence of *left-to-right* matrix products:
 mod_W = torch.cat([
     torch.nn.functional.pad(W, (0, 1), value=0),
     torch.nn.functional.pad(b, (0, 1), value=1).unsqueeze(-2),
