@@ -49,7 +49,7 @@ You can compute non-diagonal recurrences of the form $x_t = W_t x_{t-1} + b_t$ i
 
 ![Non-Diagonal Recurrences](assets/non_diagonal_recurrences.png)
 
-and applying a parallel prefix scan over the reformulated sequence. Example:
+and applying a parallel prefix scan over the reformulated sequence. The direction of `prefix_scan` is left-to-right, as is typical in PyTorch applications, so we multiply on the right, effectively implementing $\tilde{x}^T_t = \tilde{x}^T_0 \tilde{W}^T_1 \tilde{W}^T_2 \dots \tilde{W}^T_t$. Toy example:
 
 ```python
 import torch
