@@ -1,8 +1,6 @@
 # torch_parallel_scan
 
-A simple implementation of parallel scan over sequences of tensors for PyTorch. It works with any broadcastable binary associative function you specify. Only 40 lines of Python code, excluding docstrings and whitespace.
-
-A toy example is helpful for conveying quickly how you can use it:
+A simple implementation of parallel scan over sequences of tensors for PyTorch. It works with any broadcastable binary associative function you specify. Toy example:
 
 ```python
 import torch
@@ -12,6 +10,8 @@ DEVICE = 'cuda'  # change as needed
 x = torch.randn(8192, 64, 64, device=DEVICE) / (64**0.5)  # seq of 64 x 64 matrices
 y = tps.prefix_scan(x, prefix_func=torch.matmul, dim=-3)  # parallel cumul matmuls
 ```
+
+The entire library is only 40 lines of Python code, excluding docstrings and whitespace.
 
 
 ## Installing
