@@ -1,8 +1,17 @@
 # torch_parallel_scan
 
-A simple implementation of parallel scan over sequences of tensors for PyTorch.
+A simple implementation of parallel scan over sequences of tensors for PyTorch. It works with any broadcastable binary associative function you specify. Only 40 lines of Python code, excluding docstrings and whitespace.
 
-Only 40 lines of Python code, excluding docstrings and whitespace.
+A toy example is helpful for conveying quickly how you can use it:
+
+```python
+import torch
+import torch_parallel_scan as tps
+DEVICE = 'cuda'  # change as needed
+
+x = torch.randn(8192, 64, 64, device=DEVICE) / (64**0.5)  # seq of 64 x 64 matrices
+y = tps.prefix_scan(x, prefix_func=torch.matmul, dim=-3)  # parallel cumul matmuls
+```
 
 
 ## Installing
@@ -27,8 +36,8 @@ import torch_parallel_scan as tps
 DEVICE = 'cuda'  # change as needed
 
 n, d = (8192, 64)
-x = torch.randn(n, d, d, device=DEVICE) / (d**0.5)  # n square matrices
-y = tps.prefix_scan(x, torch.matmul, dim=-3)        # cumulative matmul
+x = torch.randn(n, d, d, device=DEVICE) / (d**0.5)        # n square matrices
+y = tps.prefix_scan(x, prefix_func=torch.matmul, dim=-3)  # cumulative matmuls
 ```
 
 ### Sequential Chain of Matrix Products via Parallel Reduce Scan
@@ -39,8 +48,8 @@ import torch_parallel_scan as tps
 DEVICE = 'cuda'  # change as needed
 
 n, d = (8192, 64)
-x = torch.randn(n, d, d, device=DEVICE) / (d**0.5)  # n square matrices
-y = tps.reduce_scan(x, torch.matmul, dim=-3)        # matmul of all matrices
+x = torch.randn(n, d, d, device=DEVICE) / (d**0.5)        # n square matrices
+y = tps.reduce_scan(x, reduce_func=torch.matmul, dim=-3)  # matmul of all matrices
 ```
 
 ### Non-Diagonal Recurrences $x_t = W_t x_{t-1} + b_t$ in Parallel
