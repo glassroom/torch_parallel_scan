@@ -100,7 +100,7 @@ mod_x = mod_x0 @ cum_mod_W
 x = mod_x[:, :-1]
 ```
 
-## Comparing execution time
+## Comparing Execution Time
 
 The following snippet of code compares the the execution time of `torch.linalg.multi_dot` to that of `tps.reduce_scan`:
 
