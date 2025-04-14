@@ -1,6 +1,6 @@
 # torch_parallel_scan
 
-A simple implementation of parallel scan over sequences of tensors for PyTorch. It works with any broadcastable binary associative function you specify. Toy example:
+Simple and fast parallel scan over sequences of tensors for PyTorch. It works with any broadcastable binary associative function you specify, including `torch.matmul`. Toy example:
 
 ```python
 import torch
@@ -12,6 +12,21 @@ y = tps.prefix_scan(x, prefix_func=torch.matmul, dim=-3)  # parallel cumul matmu
 ```
 
 The entire library is only 40 lines of Python code, excluding docstrings and whitespace.
+
+## Fast
+
+For chains of matrix products in which all matrices have the same square size, `tps.reduce_scan` can be much faster on CUDA devices than `torch.linalg.multi_dot` (which, to be fair, is designed primarily for product chains of matrices of varying sizes). The following table shows a performance comparison on a recent mid-tier CUDA device:
+
+| Chain Length   | Square Matrix Size | vs. PyTorch's multi_dot |
+|----------------|-------------------:|------------------------:|
+| 1000 matrices  |          32 x   32 |           761.1x faster |
+| 1000 matrices  |          64 x   64 |           751.6x faster |
+| 1000 matrices  |         128 x  128 |           492.4x faster |
+| 1000 matrices  |         256 x  256 |            79.0x faster |
+| 1000 matrices  |         512 x  512 |            10.5x faster |
+| 1000 matrices  |        1024 x 1024 |             1.7x faster |
+
+At the moment we cannot run a similar comparison for `tps.prefix_scan`, because PyTorch currently does not offer a built-in alternative to it. The code for running the above comparison on your own is further below.
 
 
 ## Installing
@@ -85,6 +100,37 @@ mod_x = mod_x0 @ cum_mod_W
 x = mod_x[:, :-1]
 ```
 
+## Comparing execution time
+
+The following snippet of code compares the the execution time of `torch.linalg.multi_dot` to that of `tps.reduce_scan`:
+
+```python
+import torch
+import torch.utils.benchmark
+import torch_parallel_scan as tps
+
+runs = []
+for d in [32, 64, 128, 256, 512, 1024]:
+
+    x = torch.randn(1000, d, d, device='cuda')
+
+    timer0 = torch.utils.benchmark.Timer(
+        stmt='torch.linalg.multi_dot([*x])',
+        setup='import torch',
+        globals={ 'x': x })
+
+    timer1 = torch.utils.benchmark.Timer(
+        stmt='tps.reduce_scan(x, torch.matmul, dim=-3)',
+        setup='import torch; import torch_parallel_scan as tps',
+        globals={ 'x': x })
+
+    mean0 = timer0.timeit(7).mean
+    mean1 = timer1.timeit(7).mean
+
+    runs.append({ 'matrix_size': d, 'multidot_to_tps_time': mean0 / mean1 })
+
+print(*runs, sep='\n')
+```
 
 ## Notes
 
