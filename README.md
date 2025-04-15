@@ -15,7 +15,7 @@ The entire library is only 40 lines of Python code, excluding docstrings and whi
 
 ## Fast
 
-For chains of matrix products in which all matrices have the same square size, `tps.reduce_scan` can be much faster on CUDA devices than `torch.linalg.multi_dot` (which, to be fair, is designed primarily for product chains of matrices of varying sizes). The following table shows a performance comparison on a recent mid-tier CUDA device:
+For chains of matrix products in which all matrices have the same square size, `tps.reduce_scan` can be much faster on CUDA devices than `torch.linalg.multi_dot` (which, to be fair, is designed primarily for chains of matrices of varying sizes). The following table shows a performance comparison on a recent mid-tier CUDA device:
 
 | Chain Length   | Square Matrix Size | vs. PyTorch's multi_dot |
 |----------------|-------------------:|------------------------:|
@@ -109,10 +109,13 @@ import torch
 import torch.utils.benchmark
 import torch_parallel_scan as tps
 
+DEVICE = 'cuda'  # change as needed
+n = 1000         # number of matrices in each chain
+
 runs = []
 for d in [32, 64, 128, 256, 512, 1024]:
 
-    x = torch.randn(1000, d, d, device='cuda')
+    x = torch.randn(n, d, d, device=DEVICE)
 
     timer0 = torch.utils.benchmark.Timer(
         stmt='torch.linalg.multi_dot([*x])',
